@@ -34,4 +34,10 @@ Ain't that nice?
 
 ## Try
 
-TODO
+The quickest way would be
+
+```
+nix-shell -p 'python3.withPackages(ps: with ps; [ (python3.pkgs.buildPythonPackage rec { pname = "nixpkgs"; version="0.1.0"; src = python3.pkgs.fetchPypi { inherit pname version; sha256 = "108f7h15d7cbzz6kvf15m93lzf18wgxrzb17p5vk184n3ds42lvy"; }; }) ])' --run python
+```
+
+then try `from nixpkgs import ` something.
