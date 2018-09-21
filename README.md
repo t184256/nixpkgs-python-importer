@@ -14,13 +14,13 @@ Examples:
 
 ## Why
 
-I am a researcher and I uses `python` and `xonsh` interactively a lot.
+I am a researcher and I use `python` and `xonsh` interactively a lot.
 While I appreciate the purity of Nix, sometimes I really want to violate it
 and pull in some dependency into my shell *right now*,
 without tearing my session down, editing and rebuilding an environment,
 and then recreating my session from history.
 
-A convenient way of spawning a `xonsh` instant with an extra dependency
+A convenient way of spawning a `xonsh` instance with an extra dependency
 soothes the nerves a bit, but doesn't really free me from the recreation part.
 
 I started writing a xonsh macro that ended up being a generic Python solution
