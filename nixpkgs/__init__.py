@@ -39,17 +39,20 @@ import sys
 
 def try_nixpkgs(topmost_name):
     '''
-    Try to instantiate python3Packages.<name>.
+    Try to instantiate python3?Packages.<name>.
     While we're at it, find and also return all the dependencies.
     '''
     try:
-        # Instantiate python3Packages.<name>
-        cmd = ['nix-build', '--no-out-link', '<nixpkgs>',
-               '-A', 'python3Packages.' + topmost_name]
+        # Determine python version and the attribute
+        assert sys.version_info.major == 3
+        a = 'python3{}Packages.{}'.format(sys.version_info.minor, topmost_name)
+
+        # Instantiate python3?Packages.<name> attribute
+        cmd = ['nix-build', '--no-out-link', '<nixpkgs>', '-A', a]
         result = subprocess.run(cmd, stdout=subprocess.PIPE, check=True)
         derivation_path = result.stdout.decode().rstrip()
 
-        # List all the requisite paths: we'll need them to import our package
+        # List all the requisite paths: we'll need them to import our module
         cmd = ['nix-store', '--query', '--requisites', derivation_path]
         result = subprocess.run(cmd, stdout=subprocess.PIPE, check=True)
         deps_derivation_paths = result.stdout.decode().split()
