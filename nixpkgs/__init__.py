@@ -30,6 +30,7 @@ It works by instantiating the required derivations with 'nix-build',
 temporarily monkey-patching the sys.path and importing them.
 '''
 
+import nix
 import glob
 import importlib
 import os
@@ -43,24 +44,28 @@ def try_nixpkgs(topmost_name):
     While we're at it, find and also return all the dependencies.
     '''
     try:
-        # Determine python version and the attribute
         assert sys.version_info.major == 3
-        a = 'python3{}Packages.{}'.format(sys.version_info.minor, topmost_name)
+        # Instantiate python3Packages.<name>
+        # Returns a list of required paths where the first one is the module path
+        module_name = topmost_name
+        store_paths = nix.eval("""
+        with import <nixpkgs> {};
+        let
+          drv = python3%sPackages.%s;
+        in builtins.map (drv: "${drv}")
+          ([ drv ] ++ drv.propagatedBuildInputs)
+        """ % (sys.version_info.minor, module_name))
 
-        # Instantiate python3?Packages.<name> attribute
-        cmd = ['nix-build', '--no-out-link', '<nixpkgs>', '-A', a]
-        result = subprocess.run(cmd, stdout=subprocess.PIPE, check=True)
-        derivation_path = result.stdout.decode().rstrip()
-
-        # List all the requisite paths: we'll need them to import our module
-        cmd = ['nix-store', '--query', '--requisites', derivation_path]
-        result = subprocess.run(cmd, stdout=subprocess.PIPE, check=True)
-        deps_derivation_paths = result.stdout.decode().split()
+        # Build/download path
+        cmd = ['nix-store', '--realise', '--quiet', store_paths[0]]
+        subprocess.run(cmd, stdout=subprocess.PIPE, check=True)
 
         # Guess sys.path-usable subpaths from them (and flatten the list)
-        python_paths = [glob.glob(os.path.join(p, 'lib', 'py*', '*-packages'))
-                        for p in [derivation_path] + deps_derivation_paths]
-        return sum(python_paths, [])
+        return sum((
+            glob.glob(os.path.join(p, 'lib', 'py*', '*-packages'))
+            for p in store_paths
+        ), [])
+
     except Exception as ex:
         print(ex)  # We're not trying too hard here, do we?
 
@@ -74,7 +79,7 @@ class NixpkgsFinder:
         if module_name.startswith('nixpkgs.'):
             try_name = module_name.split('.')[1]
             required_paths = try_nixpkgs(try_name)
-            if required_paths is not None:  # maybe we can load it, let's try
+            if required_paths:
                 return FromExtraPathsLoader(required_paths,
                                             pseudo_namespace='nixpkgs')
 
