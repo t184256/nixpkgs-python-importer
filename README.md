@@ -6,10 +6,11 @@ An importlib hack that allows `from nixpkgs import somepackage`.
 
 Examples:
 
-    import nixpkgs.scipy
-    from nixpkgs import scipy
-    from nixpkgs.matplotlib import pyplot as plt
-    import nixpkgs.matplotlib.pyplot as plt
+    import nixpkgs.scipy.scipy
+    from nixpkgs.scipy import scipy
+    from nixpkgs.matplotlib.matplotlib import pyplot as plt
+    import nixpkgs.matplotlib.matplotlib.pyplot as plt
+    from nixpkgs.pillow.PIL import Image
 
 
 ## Why
