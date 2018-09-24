@@ -25,7 +25,7 @@ A convenient way of spawning a `xonsh` instance with an extra dependency
 soothes the nerves a bit, but doesn't really free me from the recreation part.
 
 I started writing a xonsh macro that ended up being a generic Python solution
-with a pleasingly nice syntax. I mean, `from nixpkgs import scipy`.
+with a pleasingly nice syntax. I mean, `from nixpkgs.scipy import scipy`.
 Ain't that nice?
 
 
