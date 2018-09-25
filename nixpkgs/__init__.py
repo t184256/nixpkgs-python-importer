@@ -122,11 +122,12 @@ class FromExtraPathsLoader:
                 yield f
                 continue
 
-            if f.endswith('.py'):
-                yield f.rstrip('.py')
-
             if f.endswith('.egg'):
                 yield f.split('-')[0]
+
+            root, ext = os.path.splitext(f)
+            if ext in ('.py', '.so'):
+                yield root
 
     def load_module(self, name):
         '''
@@ -152,12 +153,8 @@ class FromExtraPathsLoader:
                 except (ImportError, ModuleNotFoundError):
                     pass
                 else:
-                    # Insert as both eg PIL and nixpkgs.pillow.PIL
                     # The python module system assumes that a module will be
                     # available under the exact imported path
-                    #
-                    # We also want to make it available as `import PIL`
-                    sys.modules[python_mod_path] = mod
                     sys.modules[name] = mod
         finally:
                 sys.path = old_path
