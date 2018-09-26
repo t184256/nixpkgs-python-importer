@@ -32,6 +32,7 @@ temporarily monkey-patching the sys.path and importing them.
 import nix
 import glob
 import importlib
+import hashlib
 import os
 import subprocess
 import functools
@@ -49,6 +50,7 @@ def try_nixpkgs(topmost_name):
         # Instantiate python3Packages.<name>
         # Returns a list of store paths where the first one is the module path
         module_name = topmost_name
+        attr_path = "python3%sPackages.%s" % (sys.version_info.minor, module_name)
         store_paths = nix.eval("""
           with import <nixpkgs> {}; let
             getClosure = drv: let
@@ -56,12 +58,24 @@ def try_nixpkgs(topmost_name):
                 (builtins.filter (x: x != null) drv.propagatedBuildInputs)
                 else [];
             in lib.foldl (acc: v: acc ++ getClosure v) [ drv ] propagated;
-          in builtins.map (drv: "${drv}") (lib.unique (getClosure python3%sPackages.%s))
-        """ % (sys.version_info.minor, module_name))
+          in builtins.map (drv: "${drv}") (lib.unique (getClosure %s))
+        """ % attr_path)
 
         # Build/download path
-        cmd = ['nix-store', '--realise', '--quiet', store_paths[0]]
-        subprocess.run(cmd, stdout=subprocess.PIPE, check=True)
+        if not os.path.exists(store_paths[0]):
+            # Abuse IFD to realise store path
+            # Try to import a file that will never exist
+            dummy_file = hashlib.sha1(attr_path.encode()).hexdigest()
+            try:
+                nix.eval("""
+                  with import <nixpkgs> {};
+                  import "${%s}/%s.nix"
+                """ % (attr_path, dummy_file))
+            except:
+                # If store path does not exist at this point the error should
+                # not be an import error
+                if not os.path.exists(store_paths[0]):
+                    raise
 
         # Guess sys.path-usable subpaths from them (and flatten the list)
         return sum((
