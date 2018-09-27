@@ -34,7 +34,6 @@ import glob
 import importlib
 import hashlib
 import os
-import subprocess
 import functools
 import sys
 
