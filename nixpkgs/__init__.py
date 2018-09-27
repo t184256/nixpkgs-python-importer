@@ -29,13 +29,16 @@ Examples:
 It works by instantiating the required derivations with 'nix-build',
 temporarily monkey-patching the sys.path and importing them.
 '''
-import nix
-import glob
-import importlib
-import hashlib
-import os
+
 import functools
+import glob
+import hashlib
+import importlib
+import os
+import site
 import sys
+
+import nix
 
 
 @functools.lru_cache()
@@ -79,7 +82,7 @@ def try_nixpkgs(topmost_name):
                 # If it does, the realization was a success.
                 # Otherwise, it's likely a missing/misspelt derivation name
                 if not os.path.exists(store_paths[0]):
-                    raise
+                    raise ex
 
         # Guess sys.path-usable subpaths from them (and flatten the list)
         return sum((
@@ -126,7 +129,23 @@ class NixPackage:
 
 class FromExtraPathsLoader:
     def __init__(self, extra_paths):
-        self.extra_paths = extra_paths
+        self.extra_paths = []
+        for path in extra_paths:
+            self._add_path(path)
+
+    def _add_path(self, path):
+        # The simple way is to
+        self.extra_paths.append(path)
+        # The roadblock is that paths can contain .pth files,
+        # that should be parsed and processed too:
+        # https://docs.python.org/3/library/site.html
+        # While the format is simple enough, let's not reinvent the wheel,
+        # but pile up another hacky hack and reuse site.addsitedir.
+        old_path, sys.path = sys.path, sys.path[:]
+        site.addsitedir(path)  # resolves .pth files, adds them to sys.path
+        sys_path_delta = [p for p in sys.path if p not in old_path]
+        sys.path = old_path
+        self.extra_paths.extend(sys_path_delta)
 
     def _filter_modules(self):
         base_path = self.extra_paths[0]
@@ -163,7 +182,6 @@ class FromExtraPathsLoader:
             if not python_mod:
                 pkg = NixPackage(name)
                 for module_name in self._filter_modules():
-                    print(sys.path)
                     mod = importlib.import_module(module_name)
                     setattr(pkg, module_name, mod)
                     sys.modules[name] = pkg
