@@ -49,7 +49,10 @@ def try_nixpkgs(topmost_name):
         # Instantiate python3Packages.<name>
         # Returns a list of store paths where the first one is the module path
         module_name = topmost_name
-        attr_path = "python3%sPackages.%s" % (sys.version_info.minor, module_name)
+        attr_path = "python3%sPackages.%s" % (
+            sys.version_info.minor,
+            module_name
+        )
         store_paths = nix.eval("""
           with import <nixpkgs> {}; let
             getClosure = drv: let
@@ -110,7 +113,9 @@ class NixPackage:
     def __repr__(self):
         return ''.join((
             '<nixpkgs.NixPackage [',
-            ', '.join('\'%s\'' % attr for attr in dir(self) if not attr.startswith('_')),
+            ', '.join('\'%s\'' % attr
+                      for attr in dir(self)
+                      if not attr.startswith('_')),
             ']>',
         ))
 
