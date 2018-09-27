@@ -73,9 +73,11 @@ def try_nixpkgs(topmost_name):
                   with import <nixpkgs> {};
                   import "${%s}/%s.nix"
                 """ % (attr_path, dummy_file))
-            except:
-                # If store path does not exist at this point the error should
-                # not be an import error
+            except nix.NixError as ex:
+                # This is expected.
+                # What really matters now is whether the store path exists.
+                # If it does, the realization was a success.
+                # Otherwise, it's likely a missing/misspelt derivation name
                 if not os.path.exists(store_paths[0]):
                     raise
 
@@ -161,6 +163,7 @@ class FromExtraPathsLoader:
             if not python_mod:
                 pkg = NixPackage(name)
                 for module_name in self._filter_modules():
+                    print(sys.path)
                     mod = importlib.import_module(module_name)
                     setattr(pkg, module_name, mod)
                     sys.modules[name] = pkg
