@@ -38,7 +38,7 @@ Ain't that nice?
 The quickest way would be
 
 ```
-nix-shell -p 'python3.withPackages(ps: with ps; [ ( python3.pkgs.buildPythonPackage rec { pname = "nixpkgs"; version="0.2.1"; src = pkgs.python3Packages.fetchPypi { inherit pname version; sha256 = "0xrdk3n0jh8gwqflw9f4pj5dj43kq7ihdarmy396f95a353grp96"; }; propagatedBuildInputs = with pkgs.python3Packages; [ pbr pythonix ]; }) ])' --run python
+nix-shell -p 'python3.withPackages(ps: with ps; [ ( python3.pkgs.buildPythonPackage rec { pname = "nixpkgs"; version="0.2.2"; src = pkgs.python3Packages.fetchPypi { inherit pname version; sha256 = "0gsrd99kkv99jsrh3hckz7ns1zwndi9vvh4465v4gnpz723dd6fj"; }; propagatedBuildInputs = with pkgs.python3Packages; [ pbr pythonix ]; }) ])' --run python
 ```
 
 then try `from nixpkgs import ` something.
