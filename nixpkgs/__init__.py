@@ -76,13 +76,13 @@ def try_nixpkgs(topmost_name):
                   with import <nixpkgs> {};
                   import "${%s}/%s.nix"
                 """ % (attr_path, dummy_file))
-            except:
+            except nix.NixRef as ex:
                 # This is expected.
                 # What really matters now is whether the store path exists.
                 # If it does, the realization was a success.
                 # Otherwise, it's likely a missing/misspelt derivation name
                 if not os.path.exists(store_paths[0]):
-                    raise
+                    raise ex
 
         # Guess sys.path-usable subpaths from them (and flatten the list)
         return sum((
