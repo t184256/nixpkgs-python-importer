@@ -76,7 +76,7 @@ def try_nixpkgs(topmost_name):
                   with import <nixpkgs> {};
                   import "${%s}/%s.nix"
                 """ % (attr_path, dummy_file))
-            except nix.NixRef as ex:
+            except nix.NixError as ex:
                 # This is expected.
                 # What really matters now is whether the store path exists.
                 # If it does, the realization was a success.
