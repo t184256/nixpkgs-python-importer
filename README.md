@@ -2,12 +2,12 @@
 
 ## What
 
-An importlib hack that allows `from nixpkgs import somepackage`.
+An importlib hack that allows `from nixpkgs.pythonpackagename import modulename`.
 
 Examples:
 
-    import nixpkgs.scipy.scipy
     from nixpkgs.scipy import scipy
+    import nixpkgs.scipy.scipy
     from nixpkgs.matplotlib.matplotlib import pyplot as plt
     import nixpkgs.matplotlib.matplotlib.pyplot as plt
     from nixpkgs.pillow.PIL import Image
@@ -15,7 +15,7 @@ Examples:
 
 ## Why
 
-I am a researcher and I use `python` and `xonsh` interactively a lot.
+I used to be a researcher who used `python` and `xonsh` interactively a lot.
 While I appreciate the purity of Nix, sometimes I really want to violate it
 and pull in some dependency into my shell *right now*,
 without tearing my session down, editing and rebuilding an environment,
@@ -24,7 +24,7 @@ and then recreating my session from history.
 A convenient way of spawning a `xonsh` instance with an extra dependency
 soothes the nerves a bit, but doesn't really free me from the recreation part.
 
-I started writing a xonsh macro that ended up being a generic Python solution
+I started writing a `xonsh` macro that ended up being a generic Python solution
 with a pleasingly nice syntax. I mean, `from nixpkgs.scipy import scipy`.
 Ain't that nice?
 
