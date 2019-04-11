@@ -33,12 +33,19 @@ Ain't that nice?
 
 `importlib` magic
 
+
 ## Try
 
-The quickest way would be
+The quickest way to try it would be (on a recent NixOS):
 
 ```
-nix-shell -p 'python3.withPackages(ps: with ps; [ ( python3.pkgs.buildPythonPackage rec { pname = "nixpkgs"; version="0.2.2"; src = pkgs.python3Packages.fetchPypi { inherit pname version; sha256 = "0gsrd99kkv99jsrh3hckz7ns1zwndi9vvh4465v4gnpz723dd6fj"; }; propagatedBuildInputs = with pkgs.python3Packages; [ pbr pythonix ]; }) ])' --run python
+nix run -f '(import <nixpkgs> {}).python3.withPackages(ps:[ps.nixpkgs])' -c python
 ```
+then try `from nixpkgs.pbr import pbr` (or any other package).
 
-then try `from nixpkgs import ` something.
+
+If that doesn't work, you may also try your luck with unstable nixpkgs:
+
+```
+nix run -f channel:nixos-unstable '(import <nixpkgs> {}).python3.withPackages(ps:[ps.nixpkgs])' -c python
+```
