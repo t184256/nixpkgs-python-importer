@@ -112,8 +112,10 @@ class NixPackage:
     Returned in place of an actual module
     Used to supply a namespace for all python modules in a nix package
     """
-    def __init__(self, name):
+    def __init__(self, name, doc=None):
         self.__name__ = name
+        if doc is not None:
+            self.__doc__ = doc
 
     def __repr__(self):
         return ''.join((
@@ -197,6 +199,27 @@ class FromExtraPathsLoader:
                     sys.modules[name] = mod
         finally:
                 sys.path = old_path
+
+
+def init_module():
+    """
+    Initialise module
+
+    This creates completions with docstrings for all derivations in the python package set
+    """
+
+    attr_path = "python3%sPackages" % sys.version_info.minor
+    expr = """
+      with import <nixpkgs> {}; let
+        drvAttrs = lib.filterAttrs (k: v: (builtins.tryEval v).success && builtins.typeOf v == "set") %s;
+        meta = builtins.mapAttrs (k: v: if builtins.hasAttr "meta" v then v.meta else {}) drvAttrs;
+      in builtins.mapAttrs (k: v: if builtins.hasAttr "description" v then v.description else "") meta
+    """ % attr_path
+
+    g = globals()
+    for attr, desc in nix.eval(expr).items():
+        if attr not in g:
+            g[attr] = NixPackage(attr, doc=desc)
 
 
 sys.meta_path.append(NixpkgsFinder())
