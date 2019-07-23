@@ -39,7 +39,7 @@ Ain't that nice?
 The quickest way to try it would be (on a recent NixOS):
 
 ```
-nix run -f '(import <nixpkgs> {}).python3.withPackages(ps:[ps.nixpkgs])' -c python
+nix run '(import <nixpkgs> {}).python3.withPackages(ps:[ps.nixpkgs])' -c python
 ```
 then try `from nixpkgs.pbr import pbr` (or any other package).
 
