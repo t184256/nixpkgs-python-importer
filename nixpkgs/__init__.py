@@ -26,7 +26,7 @@ Examples:
     from nixpkgs import scipy
     from nixpkgs.matplotlib import pyplot as plt
     import nixpkgs.matplotlib.pyplot as plt
-It works by instantiating the required derivations with 'nix-build',
+It works by instantiating the required derivations,
 temporarily monkey-patching the sys.path and importing them.
 '''
 
